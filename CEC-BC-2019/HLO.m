@@ -62,7 +62,7 @@ function [PreyFit, Prey, HLO_curve] = HLO(SearchAgents_no, Max_iter, lb, ub, dim
             Prey_pred = Prey + V_prey .* ToF;
 
             %Eq. (9): ?
-            beta = (1 - it / Max_iter) ^ 2; % decays from 0.2 -> 0
+            beta = (1 - it / Max_iter) ^ 2;
             %Eq. (8): ?
             explorationNoise = 0.07 * randn(1,dim) .* (ub - lb) .* beta;
 
