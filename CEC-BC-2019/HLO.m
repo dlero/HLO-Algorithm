@@ -12,8 +12,8 @@
 %                                                                                                                                    %
 %   Main paper: Dler O. Hasan, Hardi M. Mohammed, Zrar Khalid Abdul,                 %
 %               Hunter Lead Optimization: A Predictive Metaheuristic for Benchmark and Real-World Engineering Problems,%
-%               Cluster Computing,                                                               %
-%               DOI:                                                               %
+%               IEEE Access,                                                               %
+%               DOI: https://doi.org/10.1109/ACCESS.2026.3735902                           %
 %                                                                                                                                     %
 %________________________________________________________________%
 function [PreyFit, Prey, HLO_curve] = HLO(SearchAgents_no, Max_iter, lb, ub, dim, fobj)
