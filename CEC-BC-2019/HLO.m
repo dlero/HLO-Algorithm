@@ -16,21 +16,21 @@
 %               DOI: https://doi.org/10.1109/ACCESS.2026.3735902                           %
 %                                                                                                                                     %
 %________________________________________________________________%
-function [PreyFit, Prey, HLO_curve] = HLO(SearchAgents_no, Max_iter, lb, ub, dim, fobj)
+function [PreyFit, Prey, HLO_curve] = HLO(N, Max_iter, lb, ub, dim, fobj)
 
     lb = ones(1, dim) .* lb;
     ub = ones(1, dim) .* ub;
 
-    B = zeros(SearchAgents_no, dim);
+    B = zeros(N, dim);
 
     for j = 1:dim
-        B(:, j) = lb(j) + rand(SearchAgents_no, 1) .* (ub(j) - lb(j));
+        B(:, j) = lb(j) + rand(N, 1) .* (ub(j) - lb(j));
     end
 
     % --- initialize fitness and best trackers -----------------------------
-    fit = inf(1, SearchAgents_no); % fitness values (minimization problem)
+    fit = inf(1, N); % fitness values (minimization problem)
 
-    for i = 1:SearchAgents_no
+    for i = 1:N
         fit(i) = fobj(B(i, :));
     end
 
@@ -41,54 +41,50 @@ function [PreyFit, Prey, HLO_curve] = HLO(SearchAgents_no, Max_iter, lb, ub, dim
     % --- HLO curve for convergence plotting -------------------------------
     HLO_curve = inf(1, Max_iter);
 
-    proj_speed = 1.0; % virtual projectile speed (units per iteration)
+    vp = 1.0; % virtual projectile speed (units per iteration)
 
     % Main loop
     for it = 1:Max_iter
         % Eq. (3): --- estimate prey (best) velocity from last iteration -----------
         V_prey = Prey - Prey_prev;
 
-        %  Eq. (6): ? (confidence)
+        %  Eq. (6): (confidence)
         [~, order] = sort(fit, 'ascend'); % best -> worst ordering indices
-        ranks = 1:SearchAgents_no; % rank values 1..N
-        invperm(order) = ranks; % invperm(i) gives rank of agent i
-        confidence = 1 - (invperm - 1) ./ max(SearchAgents_no - 1, 1); % ? attention in (1..0], best agents get ~1
+        ranks = 1:N; % rank values 1..N
+        ra(order) = ranks; % ra(i) gives rank of agent i
+        alpha = 1 - (ra - 1) ./ max(N - 1, 1); % attention in (1..0], best agents get ~1
 
-        % --- for each agent, predict where best will be when a "projectile arrives"
-        for i = 1:SearchAgents_no
+        for i = 1:N
             %Eq. (4): ToF
-            ToF = norm(B(i, :) - Prey) / proj_speed; % estimated time until "hit"
+            ToF = norm(B(i, :) - Prey) / vp; % estimated time until "hit"
             %Eq. (5): Prey_pred
             Prey_pred = Prey + V_prey .* ToF;
 
-            %Eq. (9): ?
+            %Eq. (9):
             beta = (1 - it / Max_iter) ^ 2;
-            %Eq. (8): ?
-            explorationNoise = 0.07 * randn(1,dim) .* (ub - lb) .* beta;
+            %Eq. (8):
+            epsilon = 0.07 * randn(1, dim) .* (ub - lb) .* beta;
 
             %Eq. (7):
-            Target = (1 - confidence(i)) .* Prey + confidence(i) .* Prey_pred + explorationNoise;
+            Target = (1 - alpha(i)) .* Prey + alpha(i) .* Prey_pred + epsilon;
 
-            %?
+            %Eq. (11)
             b = rand > 0.9;
-            eta = (0.3 + 0.7 * confidence(i)) .* (b * rand(1, dim) + (1 - b) * randn(1, dim));
+            eta = (0.3 + 0.7 * alpha(i)) .* (b * rand(1, dim) + (1 - b) * randn(1, dim));
             %Eq. (10): Bnew
             Bnew = B(i, :) + eta .* (Target - B(i, :)); % apply step
 
             % ---- enforce bounds -----
-            Bnew = max(Bnew, lb); % clip lower bound
-            Bnew = min(Bnew, ub); % clip upper bound
+            Bnew = apply_bounds(Bnew, lb, ub);
 
-            % %Eq. (11): ---- greedy replacement if better -----------
+            % %Eq. (12): ---- greedy replacement if better -----------
             fnew = fobj(Bnew);
 
             if fnew < fit(i)
                 B(i, :) = Bnew;
                 fit(i) = fnew;
             end
-
         end
-
         % --- update global best and keep previous best for next velocity --
         [best_curr, loc_curr] = min(fit); % current generation best
         Prey_prev = Prey; % move old best to prev
@@ -97,8 +93,11 @@ function [PreyFit, Prey, HLO_curve] = HLO(SearchAgents_no, Max_iter, lb, ub, dim
             PreyFit = best_curr; % update best score
             Prey = B(loc_curr, :); % update best position
         end
-
         HLO_curve(it) = PreyFit; % store best-so-far value
     end
 
+    function X_new = apply_bounds(X_new, lb, ub)
+        X_new = max(X_new, lb);
+        X_new = min(X_new, ub);
+    end
 end
