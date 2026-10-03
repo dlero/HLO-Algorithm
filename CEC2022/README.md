@@ -83,19 +83,16 @@ fprintf('Best Fitness = %f\n', PreyFit);
 
 HLO has been extensively evaluated on:
 
-* CEC2017 Benchmark Suite (29 functions)
+* CEC2017 Benchmark Suite: 29 functions in 30- and 50-dimensional settings.
 * CEC-BC-2019 Benchmark Suite (10 functions)
 * CEC2022 Benchmark Suite (12 functions)
 
 The algorithm was compared against numerous recent and classical optimization methods, including:
 
 * ALA
-* DOA
 * HBO
 * KEO
-* MShOA
 * MSO
-* PO
 * RFO
 * WO
 * AZOA
@@ -145,11 +142,12 @@ This linear complexity makes HLO suitable for high-dimensional optimization task
 If you use HLO in your research, please cite:
 
 ```bibtex
-@article{Hasan2025HLO,
-  title={Hunter Lead Optimization: A Predictive Metaheuristic for Benchmark and Real-World Engineering Problems},
-  author={Hasan, Dler O. and Mohammed, Hardi M. and Abdul, Zrar Khalid},
-  journal={Cluster Computing},
-  year={2025}
+@article{Hasan2026HLO,
+  title   = {Hunter Lead Optimization: A New Metaheuristic Algorithm for Benchmark Functions and Real-World Problems},
+  author  = {Hasan, Dler O. and Mohammed, Hardi M. and Abdul, Zrar Khalid},
+  journal = {IEEE Access},
+  year    = {2026},
+  doi     = {10.1109/ACCESS.2026.3735902}
 }
 ```
 
